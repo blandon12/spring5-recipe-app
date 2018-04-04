@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - checkout
-      - run: echo "A first hello"
+      - run: mvn test
 
 #      # Download and cache dependencies
 #      - restore_cache:

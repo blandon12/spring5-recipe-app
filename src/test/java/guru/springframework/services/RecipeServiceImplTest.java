@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,5 +68,17 @@ public class RecipeServiceImplTest {
 
         // then
         assertEquals(recipe, recipeActual);
+    }
+
+    @Test
+    public void deleteRecipeByIdTest() {
+        // given
+        final Long RECIPE_ID = Long.valueOf(2L);
+
+        // when
+        recipeService.deleteById(RECIPE_ID);
+
+        // then
+        verify(recipeRepository, times(1)).deleteById(anyLong());
     }
 }

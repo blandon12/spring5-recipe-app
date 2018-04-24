@@ -5,6 +5,7 @@ import guru.springframework.converters.IngredientCommandToIngredient;
 import guru.springframework.converters.IngredientToIngredientCommand;
 import guru.springframework.domain.Ingredient;
 import guru.springframework.domain.Recipe;
+import guru.springframework.repositories.IngredientRepository;
 import guru.springframework.repositories.RecipeRepository;
 import guru.springframework.repositories.UnitOfMeasureRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +25,17 @@ public class IngredientServiceImpl implements IngredientService {
     private final IngredientCommandToIngredient ingredientCommandToIngredient;
     private final RecipeRepository recipeRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
+    private final IngredientRepository ingredientRepository;
 
     public IngredientServiceImpl(IngredientToIngredientCommand ingredientToIngredientCommand,
                                  IngredientCommandToIngredient ingredientCommandToIngredient,
-                                 RecipeRepository recipeRepository, UnitOfMeasureRepository unitOfMeasureRepository) {
+                                 RecipeRepository recipeRepository, UnitOfMeasureRepository unitOfMeasureRepository,
+                                 IngredientRepository ingredientRepository) {
         this.ingredientToIngredientCommand = ingredientToIngredientCommand;
         this.ingredientCommandToIngredient = ingredientCommandToIngredient;
         this.recipeRepository = recipeRepository;
         this.unitOfMeasureRepository = unitOfMeasureRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     @Override
@@ -110,6 +114,25 @@ public class IngredientServiceImpl implements IngredientService {
             //to do check for fail
             return ingredientToIngredientCommand.convert(savedIngredientOptional.get());
         }
+    }
 
+    @Transactional
+    public void deleteById(Long recipeId, Long ingredientId) {
+
+        Optional<Recipe> recipeOptional = recipeRepository.findById(recipeId);
+        Recipe recipe = recipeOptional.get();
+
+        Optional<Ingredient> ingredientOptional = recipe
+                .getIngredients()
+                .stream()
+                .filter(ingredient -> ingredient.getId().equals(ingredientId))
+                .findFirst();
+
+        if(ingredientOptional.isPresent()) {
+            Ingredient ingredientToDelete = ingredientOptional.get();
+            ingredientToDelete.setRecipe(null);
+            recipe.getIngredients().remove(ingredientToDelete);
+            recipeRepository.save(recipe);
+        }
     }
 }
